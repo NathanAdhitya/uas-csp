@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { InfoIcon } from "lucide-react";
 import { FetchDataSteps } from "@/components/tutorial/fetch-data-steps";
 import { Suspense } from "react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 async function UserDetails() {
   const supabase = await createClient();
@@ -25,6 +27,11 @@ export default function ProtectedPage() {
           This is a protected page that you can only see as an authenticated
           user
         </div>
+        <Link href="/protected/user-info" passHref>
+          <Button variant="default">
+            Go to your user info page
+          </Button>
+        </Link>
       </div>
       <div className="flex flex-col gap-2 items-start">
         <h2 className="font-bold text-2xl mb-4">Your user details</h2>
