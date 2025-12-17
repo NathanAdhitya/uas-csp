@@ -1,6 +1,8 @@
 import { updateSession } from "@/lib/supabase/proxy";
 import { type NextRequest } from "next/server";
 
+// Bagian 4: Proteksi Rute (Middleware)
+
 export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }

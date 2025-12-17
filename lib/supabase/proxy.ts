@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
 import { Database } from "../db.types";
 
+// Bagian 4: Proteksi Rute (Middleware)
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -13,6 +15,8 @@ export async function updateSession(request: NextRequest) {
   if (!hasEnvVars) {
     return supabaseResponse;
   }
+
+  // Pastikan sesi Supabase diperbarui (refresh session) di dalam middleware ini.
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
@@ -26,17 +30,17 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
+            request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
+            supabaseResponse.cookies.set(name, value, options)
           );
         },
       },
-    },
+    }
   );
 
   // Do not run code between createServerClient and
@@ -48,17 +52,43 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  /*
+  Skenario A: Jika pengguna belum login mencoba mengakses /dashboard, mereka harus dipaksa
+redirect kembali ke /login.
+  Skenario B: Jika pengguna sudah login mencoba mengakses /login, mereka harus dipaksa
+redirect masuk ke /dashboard.
+  */
+
+  // Skenario A
+  if (request.nextUrl.pathname.startsWith("/dashboard") &&
+    !user) {
+    // no user, respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
+
+  // Skenario B
+  if (request.nextUrl.pathname.startsWith("/login") &&
+    user) {
+    // have user, respond by redirecting the user to the dashboard page
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  // Supabase default handling template
+  // if (
+  //   request.nextUrl.pathname !== "/" &&
+  //   !user &&
+  //   !request.nextUrl.pathname.startsWith("/login") &&
+  //   !request.nextUrl.pathname.startsWith("/auth")
+  // ) {
+  //   // no user, potentially respond by redirecting the user to the login page
+  //   const url = request.nextUrl.clone();
+  //   url.pathname = "/auth/login";
+  //   return NextResponse.redirect(url);
+  // }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:

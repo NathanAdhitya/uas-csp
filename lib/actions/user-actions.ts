@@ -1,4 +1,5 @@
 "use server";
+import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 
 interface FormState {
@@ -27,7 +28,7 @@ export async function authenticateUser(
 
   // Update this route to redirect to an authenticated route. The user already has an active session.
   return {
-    redirect: "/protected",
+    redirect: "/dashboard",
   };
 }
 
@@ -48,7 +49,7 @@ export async function createUser(initialState: FormState, formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/protected`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
     },
   });
   if (error)
@@ -57,6 +58,12 @@ export async function createUser(initialState: FormState, formData: FormData) {
     };
 
   return {
-    redirect: "/auth/sign-up-success",
+    redirect: "/register/success",
   };
+}
+
+export async function logoutUser() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
 }

@@ -14,30 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
-      user_info: {
+      announcements: {
         Row: {
-          address: string | null
+          content: string
           created_at: string
-          id: string
-          ktp_number: string | null
-          name: string | null
-          photo_url: string | null
+          id: number
+          title: string
         }
         Insert: {
-          address?: string | null
+          content: string
           created_at?: string
-          id?: string
-          ktp_number?: string | null
-          name?: string | null
-          photo_url?: string | null
+          id?: number
+          title: string
         }
         Update: {
-          address?: string | null
+          content?: string
           created_at?: string
-          id?: string
-          ktp_number?: string | null
-          name?: string | null
-          photo_url?: string | null
+          id?: number
+          title?: string
         }
         Relationships: []
       }
